@@ -6,13 +6,13 @@
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ----- Active nav state (header markup stays identical across pages) ----- */
-  var path = location.pathname.replace(/\.html$/, "").replace(/\/$/, "") || "/";
+  /* ----- Active nav state (works for both relative .html and clean URLs) ----- */
+  var current = (location.pathname.split("/").pop() || "").replace(/\.html$/, "") || "index";
   document.querySelectorAll(".site-header a[href], .nav-mobile a[href]").forEach(function (a) {
     var href = a.getAttribute("href");
-    if (!href || href.charAt(0) !== "/") return;
-    var clean = href.replace(/\.html$/, "").replace(/\/$/, "") || "/";
-    if (clean === path) a.setAttribute("aria-current", "page");
+    if (!href || /^(https?:|tel:|mailto:|#)/.test(href)) return;
+    var target = (href.split("/").pop() || "").replace(/\.html$/, "") || "index";
+    if (target === current) a.setAttribute("aria-current", "page");
   });
 
   /* ----- Desktop services dropdown ----- */
