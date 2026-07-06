@@ -65,6 +65,9 @@
   }
 
   /* ----- Scroll reveals (enhance visible-by-default content) ----- */
+  function revealAll() {
+    document.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("in"); });
+  }
   if ("IntersectionObserver" in window && !reduceMotion) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
@@ -72,8 +75,10 @@
       });
     }, { rootMargin: "0px 0px -80px 0px", threshold: 0.05 });
     document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
+    // Failsafe: never leave content hidden if the observer does not fire.
+    window.addEventListener("load", function () { setTimeout(revealAll, 2500); });
   } else {
-    document.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("in"); });
+    revealAll();
   }
 
   /* ----- Gallery filters ----- */
