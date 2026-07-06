@@ -1,0 +1,63 @@
+# The Great Indoors Wood Floors — Hostinger (Apache/LiteSpeed)
+Options -MultiViews -Indexes
+DirectoryIndex index.html
+
+RewriteEngine On
+
+# --- Force HTTPS and strip www (single 301 hop) ---
+RewriteCond %{HTTPS} off [OR]
+RewriteCond %{HTTP_HOST} ^www\. [NC]
+RewriteCond %{HTTP_HOST} ^(?:www\.)?(.+)$ [NC]
+RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+
+# --- /index.html -> / ---
+RewriteCond %{THE_REQUEST} \s/index\.html[\s?] [NC]
+RewriteRule ^ / [R=301,L]
+
+# --- Old indexed URLs: /page.html -> /page (preserves link equity) ---
+RewriteCond %{THE_REQUEST} \s/([^\s?]+)\.html[\s?] [NC]
+RewriteRule ^ /%1 [R=301,L]
+
+# --- Collapse /index -> / (avoid duplicate homepage) ---
+RewriteRule ^index/?$ / [R=301,L]
+
+# --- Strip trailing slash on files -> canonical no-slash URL ---
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+# --- Serve /page from page.html internally (clean URLs) ---
+# Exclude /404 so a missing page returns a genuine 404, not a 200.
+RewriteCond %{REQUEST_URI} !^/404$
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+RewriteRule ^(.+?)/?$ $1.html [L]
+
+# --- Custom 404 ---
+ErrorDocument 404 /404.html
+
+# --- Compression ---
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+# --- Browser caching ---
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+  ExpiresByType text/html "access plus 1 hour"
+</IfModule>
+
+# --- Security headers ---
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+AddDefaultCharset utf-8
