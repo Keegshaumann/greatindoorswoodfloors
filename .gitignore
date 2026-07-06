@@ -1,3 +1,6 @@
 .DS_Store
 *.log
 node_modules/
+
+# Local preview helper, not part of the deployed site
+preview.py
